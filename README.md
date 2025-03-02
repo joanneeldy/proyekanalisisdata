@@ -111,7 +111,8 @@ Cara Menjalankan Dashboard Secara Lokal:
 Pastikan virtual environment aktif (jika digunakan) dan semua library telah terinstal.
 Buka terminal dan arahkan ke direktori proyek.
 Jalankan perintah berikut:
-```streamlit run dashboard/dashboard.py
+```
+streamlit run dashboard/dashboard.py
 ```
 Dashboard akan terbuka di browser secara otomatis.
 
@@ -137,6 +138,7 @@ Proyek ini telah mengungkap insight penting dari data Bike Sharing, termasuk tre
 
 Notebook: Buka dan jalankan notebook.ipynb untuk mereproduksi proses data cleaning, merging, dan EDA.
 Dashboard: Jalankan perintah berikut di terminal:
-```streamlit run dashboard/dashboard.py
+```
+streamlit run dashboard/dashboard.py
 ```
 Dataset: Pastikan file dataset asli dan file data bersih berada di folder data.
