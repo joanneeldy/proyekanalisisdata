@@ -106,5 +106,7 @@ Notebook: Buka dan jalankan notebook.ipynb untuk mereproduksi proses data cleani
 Dashboard: Jalankan perintah streamlit run dashboard/dashboard.py dari terminal untuk membuka dashboard interaktif.
 Dataset: Pastikan file dataset asli dan file bersih berada di folder data.
 
+https://joanneeldy-proyekdata.streamlit.app/
+
 ### 8. Kesimpulan
 Proyek ini berhasil menggabungkan data harian dan per jam dari Bike Sharing untuk mengungkap pola-pola penting seperti tren penyewaan, pengaruh waktu, kondisi musim, kelembapan, dan perbedaan antara weekdays dan weekend. Insight ini dapat digunakan untuk membantu dalam pengambilan keputusan operasional serta perencanaan strategi.
