@@ -24,89 +24,119 @@ Submission Proyek Analisis Data
 └── requirements.txt
 
 
-## 3. Proses Data Cleaning & Merging
+## 3. Setup Environment & Instalasi Library
 
-### 3.1. Memuat Data dan Konversi Tanggal
+### 3.1. Membuat Virtual Environment (Opsional)
+Disarankan untuk membuat virtual environment agar dependency proyek tidak tercampur dengan paket lainnya.
+Contoh menggunakan **venv**:
+```bash
+python -m venv venv
+```
+Aktifkan virtual environment:
+- Windows:
+  ```
+  venv\Scripts\activate
+  ```
+- Mac/Linux:
+  ```
+  source venv/bin/activate
+  ```
 
-Kita mulai dengan membaca file CSV dan mengkonversi kolom tanggal (`dteday`) ke tipe datetime.
-
-```python
-import pandas as pd
-
-# Membaca data asli
-day_df = pd.read_csv('data/day.csv')
-hour_df = pd.read_csv('data/hour.csv')
-
-# Konversi kolom tanggal menjadi datetime
-day_df['dteday'] = pd.to_datetime(day_df['dteday'])
-hour_df['dteday'] = pd.to_datetime(hour_df['dteday'])
+### 3.2. Instalasi Library
+Pastikan kamu sudah menginstal semua library yang dibutuhkan dengan menjalankan perintah:
+```
+pip install -r requirements.txt
+```
+Untuk mengecek versi library yang digunakan, kamu bisa menggunakan:
+```
+pip freeze > requirements.txt
 ```
 
-### 3.2. Merging Data
+### 4. Proses Data Cleaning & Merging
 
-```
-# Buat subset dari day_df
-day_subset = day_df[['dteday', 'cnt']].copy()
-day_subset.rename(columns={'cnt': 'daily_cnt'}, inplace=True)
+Proyek ini meliputi beberapa tahap utama:
+- Memuat Data: Membaca file day.csv dan hour.csv menggunakan pandas.
+- Merging Data: Menggabungkan data per jam dan data harian agar didapatkan kolom daily_cnt yang menunjukkan total penyewaan harian.
+- Data Cleaning:
+    -> Menghapus kolom yang tidak relevan seperti instant dan workingday.
+    -> Melakukan scaling pada kolom bernilai ternormalisasi (temp, atemp, humidity, windspeed) untuk mengembalikan ke skala aslinya.
+    -> Mengkonversi kode numerik di kolom-kolom seperti season, month, weather_category, weekday, dan year menjadi label deskriptif.
+    -> Menambahkan kolom kategori (misal: category_days dan humidity_category).
+Lihat kode lengkap di dalam notebook.ipynb untuk detail setiap langkah.
 
-# Merge data per jam (hour_df) dengan data harian (day_subset)
-merged_df = pd.merge(hour_df, day_subset, on='dteday', how='left')
+Insight dari Tahap Ini:
+Data yang telah dibersihkan dan digabungkan memudahkan analisis lebih mendalam karena:
+- Semua data sudah konsisten dan siap digunakan.
+- Informasi agregat harian dan per jam tersedia dalam satu tabel.
+- Data numerik sudah dikembalikan ke skala aslinya sehingga lebih mudah diinterpretasikan.
 
-# Simpan hasil merge untuk referensi
-merged_df.to_csv('data/merged_bike_sharing.csv', index=False)
-```
+### 5. Exploratory Data Analysis (EDA)
+Pada tahap EDA, dilakukan analisis untuk menjawab pertanyaan bisnis utama:
 
-### 3.3. Data Cleaning
-- Merename Kolom: Menjadikan nama kolom lebih deskriptif.
-- Hapus Kolom Redundan: Menghapus kolom instant (hanya penomoran) dan workingday (jika sudah tergantikan oleh weekday).
-- Scaling Nilai: Mengembalikan nilai ternormalisasi ke skala aslinya.
-- Konversi Kategorikal: Mengubah nilai numerik pada kolom seperti season, month, weather_category, weekday, dan year ke label yang lebih mudah dipahami.
-- Menambahkan Kolom Kategori: Misalnya, category_days (weekend vs weekdays) dan humidity_category.
+Tren Penyewaan Sepeda:
 
-### 4. Exploratory Data Analysis (EDA)
-Pertanyaan Bisnis yang Dijawab:
+Pertanyaan: Bagaimana tren penyewaan sepeda berubah seiring waktu?
+Visualisasi: Line plot antara dateday dan daily_cnt.
+Insight: Terlihat pola musiman, seperti peningkatan penyewaan pada musim panas dan penurunan pada musim dingin.
 
-Bagaimana tren penyewaan sepeda berubah seiring waktu?
-Visualisasi: Line plot tren harian berdasarkan kolom daily_cnt vs. dateday.
+Pertanyaan: Bagaimana pengaruh faktor waktu (jam) terhadap penyewaan?
+Visualisasi: Bar plot rata-rata penyewaan (hourly_count) per jam berdasarkan kolom hr.
+Insight: Jam-jam tertentu (misalnya pagi dan sore) menunjukkan puncak penyewaan, menandakan jam sibuk.
 
-Bagaimana pengaruh faktor waktu (jam) terhadap penyewaan?
-Visualisasi: Bar plot rata-rata penyewaan per jam (hourly_count) berdasarkan kolom hr.
-
-Bagaimana pengaruh kondisi musim (season) terhadap penyewaan?
+Pertanyaan: Bagaimana pengaruh kondisi musim terhadap penyewaan?
 Visualisasi: Box plot penyewaan per jam berdasarkan season.
+Insight: Distribusi penyewaan berbeda secara signifikan antar musim.
 
-Bagaimana pengaruh kelembapan terhadap penyewaan?
-Visualisasi: Bar plot rata-rata penyewaan berdasarkan kategori kelembapan (humidity_category).
+Pertanyaan: Bagaimana pengaruh suhu terhadap penyewaan?
+Visualisasi: Bar plot berdasarkan kategori suhu (temp).
+Insight: Kondisi suhu ideal cenderung meningkatkan jumlah penyewaan.
 
-Apakah terdapat perbedaan pola antara hari kerja dan weekend?
-Visualisasi: Box plot perbandingan penyewaan antara weekdays dan weekend (dari kolom category_days).
+Pertanyaan: Apakah terdapat perbedaan pola penyewaan antara weekdays dan weekend?
+Visualisasi: Box plot perbandingan penyewaan berdasarkan category_days.
+Insight: Terlihat perbedaan pola penyewaan antara hari kerja dan akhir pekan.
 
-# Insight Utama yang Ditemukan:
+Lihat kode lengkap EDA di dalam notebook.ipynb.
 
-Tren Penyewaan per Hari:
-Terdapat pola musiman; penyewaan cenderung naik pada musim tertentu (misalnya, musim panas) dan turun pada musim dingin.
+### 6. Dashboard Interaktif dengan Streamlit
 
-Penyewaan per Jam:
-Jam-jam sibuk (seperti pagi dan sore) menunjukkan rata-rata penyewaan tertinggi.
+Dashboard interaktif memungkinkan pengguna untuk mengeksplorasi data dengan filter (misalnya, rentang tanggal dan tahun).
 
-Pengaruh Musim:
-Distribusi penyewaan bervariasi antara musim, yang dapat membantu dalam perencanaan operasional dan penambahan armada.
+Fitur Utama Dashboard:
+- Data Preview: Menampilkan contoh data bersih.
+- Filter Interaktif: Sidebar untuk memilih rentang tanggal dan tahun.
+- Visualisasi Dinamis: Grafik tren penyewaan, rata-rata penyewaan per jam, dan distribusi penyewaan berdasarkan musim yang diperbarui sesuai filter.
+- Insight Langsung: Menampilkan total penyewaan berdasarkan data yang difilter.
 
-Pengaruh Kelembapan & Hari Kerja vs Weekend:
-Kategori kelembapan dan perbedaan pola antara weekdays dan weekend menunjukkan kondisi cuaca dan hari apa yang optimal untuk penyewaan.
+Cara Menjalankan Dashboard Secara Lokal:
+Pastikan virtual environment aktif (jika digunakan) dan semua library telah terinstal.
+Buka terminal dan arahkan ke direktori proyek.
+Jalankan perintah berikut:
+```streamlit run dashboard/dashboard.py
+```
+Dashboard akan terbuka di browser secara otomatis.
 
-### 5. Dashboard Interaktif dengan Streamlit
-Dashboard dibuat untuk menyajikan analisis secara interaktif dengan fitur filter berdasarkan rentang tanggal dan tahun.
+### 7. Template Notebook
 
-### 6. Dependencies
-Lihat file requirements.txt untuk daftar library.
+Pastikan notebook (notebook.ipynb) telah disesuaikan dengan template yang disediakan, yang mencakup:
 
-### 7. Cara Menjalankan Proyek
+Header: Judul proyek dan informasi singkat.
+Tahap-tahap Analisis: Data Gathering, Data Cleaning & Merging, EDA, dan Insight.
+Markdown Cells: Berisi penjelasan dan insight dari setiap tahap.
+Komentar pada Kode: Untuk memudahkan pemahaman langkah-langkah analisis.
+
+### 8. Referensi dan Panduan
+
+Markdown Cheat Sheet – How to Write in Markdown with Examples
+Dokumentasi library yang digunakan (pandas, matplotlib, seaborn, streamlit).
+
+### 9. Kesimpulan
+
+Proyek ini telah mengungkap insight penting dari data Bike Sharing, termasuk tren penyewaan berdasarkan waktu, pengaruh musim dan kelembapan, serta perbedaan antara hari kerja dan weekend. Insight ini dapat digunakan sebagai dasar untuk pengambilan keputusan operasional dan perencanaan strategi di sistem Bike Sharing.
+
+### 10. Cara Menjalankan Proyek
+
 Notebook: Buka dan jalankan notebook.ipynb untuk mereproduksi proses data cleaning, merging, dan EDA.
-Dashboard: Jalankan perintah streamlit run dashboard/dashboard.py dari terminal untuk membuka dashboard interaktif.
-Dataset: Pastikan file dataset asli dan file bersih berada di folder data.
-
-https://joanneeldy-proyekdata.streamlit.app/
-
-### 8. Kesimpulan
-Proyek ini berhasil menggabungkan data harian dan per jam dari Bike Sharing untuk mengungkap pola-pola penting seperti tren penyewaan, pengaruh waktu, kondisi musim, kelembapan, dan perbedaan antara weekdays dan weekend. Insight ini dapat digunakan untuk membantu dalam pengambilan keputusan operasional serta perencanaan strategi.
+Dashboard: Jalankan perintah berikut di terminal:
+```streamlit run dashboard/dashboard.py
+```
+Dataset: Pastikan file dataset asli dan file data bersih berada di folder data.
