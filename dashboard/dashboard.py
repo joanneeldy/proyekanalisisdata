@@ -120,3 +120,32 @@ if 'hour' in df_filtered.columns and 'hourly_count' in df_filtered.columns:
     st.pyplot(fig5)
 else:
     st.write("Kolom 'hour' atau 'hourly_count' tidak ditemukan.")
+
+
+# --- Analisis Lanjutan: Clustering (Manual Grouping) ---
+st.subheader("Analisis Lanjutan: Pengelompokan Hari Berdasarkan Penyewaan")
+
+# Membuat kategori penggunaan (usage) dengan binning pada daily_cnt
+bins_usage = [0, 3000, 5000, df['daily_cnt'].max()]
+labels_usage = ['Low Usage', 'Medium Usage', 'High Usage']
+df['usage_category'] = pd.cut(df['daily_cnt'], bins=bins_usage, labels=labels_usage, include_lowest=True)
+
+# Tampilkan distribusi kategori penggunaan
+st.write("Distribusi kategori penggunaan harian:")
+st.write(df['usage_category'].value_counts())
+
+# Visualisasi distribusi kategori penggunaan
+fig_cluster, ax_cluster = plt.subplots(figsize=(8,6))
+sns.countplot(data=df, x='usage_category', palette='Set2', ax=ax_cluster)
+ax_cluster.set_title("Distribusi Kategori Penggunaan Harian")
+ax_cluster.set_xlabel("Kategori Penggunaan")
+ax_cluster.set_ylabel("Jumlah Hari")
+st.pyplot(fig_cluster)
+
+# --- Analisis Lanjutan ---
+st.markdown("## Analisis Lanjutan")
+st.markdown("""
+1. **RFM Analysis:** Tidak dapat diterapkan karena tidak ada data transaksi per pelanggan.
+2. **Geospatial Analysis:** Tidak dapat diterapkan karena tidak ada data lokasi.
+3. **Clustering:** Mengelompokkan hari berdasarkan total penyewaan menggunakan teknik binning.
+""")
