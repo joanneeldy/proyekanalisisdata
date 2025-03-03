@@ -4,10 +4,10 @@
 
 Proyek ini bertujuan untuk menganalisis data Bike Sharing dari Washington D.C. dengan menggabungkan data harian dan data per jam. Analisis ini mencakup seluruh proses mulai dari data cleaning, merging, eksplorasi data (EDA) hingga analisis lanjutan (misalnya, clustering manual) untuk menjawab beberapa pertanyaan bisnis, seperti:
 
-**- Bagaimana tren penyewaan sepeda berubah seiring waktu?**
-**- Bagaimana pengaruh faktor waktu (jam) terhadap jumlah penyewaan?**
-**- Bagaimana pengaruh kondisi musim dan suhu terhadap penyewaan?***
-**- Apakah terdapat perbedaan pola antara hari kerja (weekdays) dan akhir pekan (weekend)?**
+- **Bagaimana tren penyewaan sepeda berubah seiring waktu?**
+- **Bagaimana pengaruh faktor waktu (jam) terhadap jumlah penyewaan?**
+- **Bagaimana pengaruh kondisi musim dan suhu terhadap penyewaan?***
+- **Apakah terdapat perbedaan pola antara hari kerja (weekdays) dan akhir pekan (weekend)?**
 
 
 ## 2. Dataset
@@ -23,18 +23,31 @@ Proyek ini bertujuan untuk menganalisis data Bike Sharing dari Washington D.C. d
 ## 3. Struktur Proyek
 
 Submission Proyek Analisis Data:
+
 ├── Bike-sharing-dataset
+
 │   ├── clean_merged.csv
+
 │   ├── day.csv
+
 │   ├── hour.csv
+
 │   ├── merged.csv
+
 │   └── Readme.txt
+
 ├── dashboard
+
 │   └── dashboard.py
+
 ├── notebook.ipynb
+
 ├── preview_dashboard.png
+
 ├── README.md
+
 └── requirements.txt
+
 └── url.txt
 
 
@@ -71,18 +84,19 @@ Proyek ini meliputi beberapa tahap:
 - Memuat Data: Membaca file day.csv dan hour.csv menggunakan pandas.
 - Merging Data: Menggabungkan data per jam dan data harian untuk menghasilkan kolom daily_cnt (total penyewaan harian).
 - Data Cleaning:
-    -> Menghapus kolom yang tidak relevan (misalnya: instant, workingday).
-    -> Melakukan scaling pada kolom bernilai ternormalisasi (misalnya, temp, atemp, humidity, windspeed) untuk mengembalikan ke skala aslinya.
-    -> Mengonversi kode numerik di kolom seperti season, month, weather_category, weekday, dan year menjadi label deskriptif.
-    -> Menambahkan kolom kategori seperti category_days, humidity_category, dan temp_category (dengan interval suhu yang sesuai).
+  - Menghapus kolom yang tidak relevan (misalnya: instant, workingday).
+  - Melakukan scaling pada kolom bernilai ternormalisasi (misalnya, temp, atemp, humidity, windspeed) untuk mengembalikan ke skala aslinya.
+  - Mengonversi kode numerik di kolom seperti season, month, weather_category, weekday, dan year menjadi label deskriptif.
+  - Menambahkan kolom kategori seperti category_days, humidity_category, dan temp_category (dengan interval suhu yang sesuai).
 
 Lihat kode lengkap di dalam notebook.ipynb untuk detail setiap langkah.
 
 Insight:
+
 Data yang telah dibersihkan dan digabungkan memudahkan analisis lebih mendalam karena:
--> Data konsisten dan siap digunakan.
--> Informasi agregat harian dan per jam tersedia dalam satu tabel.
--> Data numerik sudah dikembalikan ke skala aslinya sehingga lebih mudah diinterpretasikan.
+- Data konsisten dan siap digunakan.
+- Informasi agregat harian dan per jam tersedia dalam satu tabel.
+- Data numerik sudah dikembalikan ke skala aslinya sehingga lebih mudah diinterpretasikan.
 
 
 ## 6. Exploratory Data Analysis (EDA)
