@@ -8,12 +8,15 @@ plt.rcParams["figure.figsize"] = (10, 6)
 
 st.title("Dashboard Analisis Bike Sharing")
 
-# Gunakan st.cache_data untuk menyimpan hasil load data
 @st.cache_data
 def load_data():
     df = pd.read_csv('Bike-sharing-dataset/clean_merged.csv')
-    # Pastikan kolom tanggal sudah di-convert
     df['dateday'] = pd.to_datetime(df['dateday'])
+    # Pastikan kolom 'temp' sudah dalam satuan Celsius
+    # Buat kategori suhu
+    bins = [0, 10, 15, 20, 25, 30, 41]
+    labels = ['Sangat Dingin', 'Dingin', 'Sejuk', 'Hangat', 'Panas', 'Sangat Panas']
+    df['temp_category'] = pd.cut(df['temp'], bins=bins, labels=labels, include_lowest=True)
     return df
 
 df = load_data()
@@ -24,13 +27,12 @@ st.write(df.head())
 # --- Sidebar Filter ---
 st.sidebar.header("Filter Data")
 
-# Filter berdasarkan tanggal (rentang tanggal)
+# Filter berdasarkan rentang tanggal
 if 'dateday' in df.columns:
     min_date = df['dateday'].min().date()
     max_date = df['dateday'].max().date()
     date_range = st.sidebar.date_input("Pilih Rentang Tanggal", [min_date, max_date])
     
-    # Jika rentang tanggal dipilih (mengembalikan list dengan dua tanggal)
     if isinstance(date_range, list) and len(date_range) == 2:
         start_date, end_date = date_range
         df_filtered = df[(df['dateday'].dt.date >= start_date) & (df['dateday'].dt.date <= end_date)]
@@ -39,37 +41,82 @@ if 'dateday' in df.columns:
 else:
     df_filtered = df.copy()
 
-# Visualisasi 1: Tren Penyewaan per Hari
+# -----------------------------
+# 1. Tren Penyewaan Sepeda per Hari (Line Plot)
+# -----------------------------
 st.subheader("Tren Penyewaan Sepeda per Hari")
-fig1, ax1 = plt.subplots()
-sns.lineplot(data=df, x='dateday', y='daily_cnt', ax=ax1)
-ax1.set_title("Total Penyewaan per Hari")
-ax1.set_xlabel("Tanggal")
-ax1.set_ylabel("Total Penyewaan")
-plt.xticks(rotation=45)
-st.pyplot(fig1)
 
-# Visualisasi 2: Rata-rata Penyewaan Berdasarkan Jam
-st.subheader("Rata-rata Penyewaan Berdasarkan Jam")
-if 'hour' in df.columns:
-    avg_by_hour = df.groupby('hour')['hourly_count'].mean().reset_index()
-    fig2, ax2 = plt.subplots()
-    sns.barplot(data=avg_by_hour, x='hour', y='hourly_count', ax=ax2)
-    ax2.set_title("Rata-rata Penyewaan per Jam")
-    ax2.set_xlabel("Jam")
+if 'dateday' in df_filtered.columns and 'daily_cnt' in df_filtered.columns:
+    fig1, ax1 = plt.subplots(figsize=(12,6))
+    sns.lineplot(data=df_filtered, x='dateday', y='daily_cnt', ax=ax1)
+    ax1.set_title("Tren Penyewaan Sepeda per Hari")
+    ax1.set_xlabel("Tanggal")
+    ax1.set_ylabel("Total Penyewaan Harian")
+    plt.xticks(rotation=45)
+    st.pyplot(fig1)
+else:
+    st.write("Kolom 'dateday' atau 'daily_cnt' tidak ditemukan.")
+
+# -----------------------------
+# 2. Rata-rata Penyewaan per Musim (Bar Plot)
+# -----------------------------
+st.subheader("Rata-rata Penyewaan per Musim")
+
+if 'season' in df_filtered.columns and 'hourly_count' in df_filtered.columns:
+    season_avg = df_filtered.groupby('season')['hourly_count'].mean().reset_index()
+    fig2, ax2 = plt.subplots(figsize=(8,6))
+    sns.barplot(data=season_avg, x='season', y='hourly_count', palette='coolwarm', ax=ax2)
+    ax2.set_title("Rata-rata Penyewaan per Musim")
+    ax2.set_xlabel("Musim")
     ax2.set_ylabel("Rata-rata Penyewaan")
     st.pyplot(fig2)
 else:
-    st.write("Kolom 'hr' tidak ditemukan di data.")
+    st.write("Kolom 'season' atau 'hourly_count' tidak ditemukan.")
 
-# Visualisasi 3: Distribusi Penyewaan Berdasarkan Musim
-st.subheader("Distribusi Penyewaan Berdasarkan Musim")
-if 'season' in df.columns:
-    fig3, ax3 = plt.subplots()
-    sns.boxplot(data=df, x='season', y='hourly_count', ax=ax3)
-    ax3.set_title("Penyewaan per Jam Berdasarkan Musim")
-    ax3.set_xlabel("Musim")
-    ax3.set_ylabel("Penyewaan per Jam")
+# -----------------------------
+# 3. Rata-rata Penyewaan per Jam Berdasarkan Kategori Suhu (Bar Plot)
+# -----------------------------
+st.subheader("Rata-rata Penyewaan Sepeda per Jam Berdasarkan Kategori Suhu")
+
+if 'temp_category' in df_filtered.columns and 'hourly_count' in df_filtered.columns:
+    # Jika df_agg_temp sudah dibuat di Notebook, kita bisa langsung hitung di sini juga
+    temp_agg = df_filtered.groupby('temp_category')['hourly_count'].mean().reset_index()
+    fig3, ax3 = plt.subplots(figsize=(8,6))
+    sns.barplot(data=temp_agg, x='temp_category', y='hourly_count', palette='magma', ax=ax3)
+    ax3.set_title("Rata-rata Penyewaan Sepeda per Jam (Kategori Suhu)")
+    ax3.set_xlabel("Kategori Suhu")
+    ax3.set_ylabel("Rata-rata Penyewaan per Jam")
     st.pyplot(fig3)
 else:
-    st.write("Kolom 'season' tidak ditemukan di data.")
+    st.write("Kolom 'temp_category' atau 'hourly_count' tidak ditemukan.")
+
+# -----------------------------
+# 4. Perbandingan Penyewaan: Hari Kerja vs Weekend (Bar Plot)
+# -----------------------------
+st.subheader("Perbandingan Penyewaan: Hari Kerja vs Weekend")
+
+if 'category_days' in df_filtered.columns and 'daily_cnt' in df_filtered.columns:
+    fig4, ax4 = plt.subplots(figsize=(8,6))
+    sns.barplot(data=df_filtered, x='category_days', y='daily_cnt', palette='pastel', ax=ax4)
+    ax4.set_title("Perbandingan Penyewaan: Hari Kerja vs Weekend")
+    ax4.set_xlabel("Kategori Hari")
+    ax4.set_ylabel("Total Penyewaan Harian")
+    st.pyplot(fig4)
+else:
+    st.write("Kolom 'category_days' atau 'daily_cnt' tidak ditemukan.")
+
+# -----------------------------
+# (Opsional) 5. Rata-rata Penyewaan Berdasarkan Jam (Bar Plot)
+# -----------------------------
+st.subheader("Rata-rata Penyewaan Berdasarkan Jam")
+
+if 'hour' in df_filtered.columns and 'hourly_count' in df_filtered.columns:
+    avg_by_hour = df_filtered.groupby('hour')['hourly_count'].mean().reset_index()
+    fig5, ax5 = plt.subplots(figsize=(8,6))
+    sns.barplot(data=avg_by_hour, x='hour', y='hourly_count', palette='viridis', ax=ax5)
+    ax5.set_title("Rata-rata Penyewaan per Jam")
+    ax5.set_xlabel("Jam")
+    ax5.set_ylabel("Rata-rata Penyewaan")
+    st.pyplot(fig5)
+else:
+    st.write("Kolom 'hour' atau 'hourly_count' tidak ditemukan.")
