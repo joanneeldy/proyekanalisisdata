@@ -130,6 +130,8 @@ Lihat kode lengkap EDA di dalam notebook.ipynb.
 
 ## 7. Dashboard Interaktif dengan Streamlit
 
+https://joanneeldy-proyekdata.streamlit.app/
+
 Dashboard interaktif dibuat untuk menyampaikan hasil analisis secara visual dan dinamis. Fitur utama dashboard:
 - Data Preview: Menampilkan contoh data yang telah dibersihkan.
 - Filter Interaktif: Sidebar untuk memilih rentang tanggal dan parameter lain jika diperlukan.
