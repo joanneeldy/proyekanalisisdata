@@ -46,16 +46,44 @@ else:
 # -----------------------------
 st.subheader("Tren Penyewaan Sepeda per Hari")
 
-if 'dateday' in df_filtered.columns and 'daily_cnt' in df_filtered.columns:
-    fig1, ax1 = plt.subplots(figsize=(12,6))
-    sns.lineplot(data=df_filtered, x='dateday', y='daily_cnt', ax=ax1)
-    ax1.set_title("Tren Penyewaan Sepeda per Hari")
-    ax1.set_xlabel("Tanggal")
-    ax1.set_ylabel("Total Penyewaan Harian")
-    plt.xticks(rotation=45)
-    st.pyplot(fig1)
-else:
-    st.write("Kolom 'dateday' atau 'daily_cnt' tidak ditemukan.")
+## Grafik 1: Total Penyewaan per Hari (Line Plot)
+st.write("### Total Penyewaan Sepeda per Hari")
+fig1, ax1 = plt.subplots(figsize=(24,5))
+sns.lineplot(data=df, x='dateday', y='daily_cnt', ax=ax1)
+ax1.set_title("Tren Penyewaan Sepeda per Hari")
+ax1.set_xlabel("Tanggal")
+ax1.set_ylabel("Total Penyewaan Harian")
+ax1.tick_params(axis='x', rotation=45)
+plt.tight_layout()
+st.pyplot(fig1)
+
+## Grafik 2: Trend Penyewaan per Hari dengan Label Setiap 2 Bulan
+st.write("### Tren Penyewaan Sepeda per Hari (Label setiap 2 bulan)")
+fig2, ax2 = plt.subplots(figsize=(12,6))
+sns.lineplot(data=df, x='dateday', y='daily_cnt', ax=ax2)
+ax2.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+ax2.xaxis.set_major_formatter(mdates.DateFormatter('%b-%Y'))
+ax2.set_title("Tren Penyewaan Sepeda per Hari")
+ax2.set_xlabel("Tanggal")
+ax2.set_ylabel("Total Penyewaan Harian")
+ax2.tick_params(axis='x', rotation=45)
+plt.tight_layout()
+st.pyplot(fig2)
+
+## Grafik 3: Tren Penyewaan per Bulan (Rata-rata)
+st.write("### Tren Penyewaan Sepeda per Bulan (Rata-rata)")
+# Buat kolom 'month_year'
+df['month_year'] = df['dateday'].dt.to_period('M').astype(str)
+# Agregasi rata-rata daily_cnt per bulan
+df_monthly = df.groupby('month_year', as_index=False)['daily_cnt'].mean()
+fig3, ax3 = plt.subplots(figsize=(12,6))
+sns.lineplot(data=df_monthly, x='month_year', y='daily_cnt', ax=ax3)
+ax3.set_title("Tren Penyewaan Sepeda per Bulan")
+ax3.set_xlabel("Bulan")
+ax3.set_ylabel("Rata-rata Penyewaan Harian")
+ax3.tick_params(axis='x', rotation=45)
+plt.tight_layout()
+st.pyplot(fig3)
 
 # -----------------------------
 # 2. Rata-rata Penyewaan per Musim (Bar Plot)
