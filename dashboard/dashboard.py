@@ -4,16 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.dates as mdates
 
-# Atur tampilan grafik
+# Atur tampilan grafik default
 plt.rcParams["figure.figsize"] = (10, 6)
 
 st.title("Dashboard Analisis Bike Sharing")
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv('Bike-sharing-dataset/clean_merged.csv')
-    df['dateday'] = pd.to_datetime(df['dateday'])
-    # Pastikan kolom 'temp' sudah dalam satuan Celsius
+    df = pd.read_csv('Bike-sharing-dataset/clean_merged.csv', parse_dates=['dateday'])
     # Buat kategori suhu
     bins = [0, 10, 15, 20, 25, 30, 41]
     labels = ['Sangat Dingin', 'Dingin', 'Sejuk', 'Hangat', 'Panas', 'Sangat Panas']
@@ -27,13 +25,10 @@ st.write(df.head())
 
 # --- Sidebar Filter ---
 st.sidebar.header("Filter Data")
-
-# Filter berdasarkan rentang tanggal
 if 'dateday' in df.columns:
     min_date = df['dateday'].min().date()
     max_date = df['dateday'].max().date()
     date_range = st.sidebar.date_input("Pilih Rentang Tanggal", [min_date, max_date])
-    
     if isinstance(date_range, list) and len(date_range) == 2:
         start_date, end_date = date_range
         df_filtered = df[(df['dateday'].dt.date >= start_date) & (df['dateday'].dt.date <= end_date)]
@@ -42,15 +37,18 @@ if 'dateday' in df.columns:
 else:
     df_filtered = df.copy()
 
+# Pastikan kolom tanggal yang digunakan adalah 'dateday'
+date_col = 'dateday'
+
 # -----------------------------
 # 1. Tren Penyewaan Sepeda per Hari (Line Plot)
 # -----------------------------
 st.subheader("Tren Penyewaan Sepeda per Hari")
 
-## Grafik 1: Total Penyewaan per Hari (Line Plot)
-st.write("### Total Penyewaan Sepeda per Hari")
+# Grafik 1: Total Penyewaan per Hari
+st.write("Total Penyewaan Sepeda per Hari")
 fig1, ax1 = plt.subplots(figsize=(24,5))
-sns.lineplot(data=df, x='dateday', y='daily_cnt', ax=ax1)
+sns.lineplot(data=df_filtered, x=date_col, y='daily_cnt', ax=ax1)
 ax1.set_title("Tren Penyewaan Sepeda per Hari")
 ax1.set_xlabel("Tanggal")
 ax1.set_ylabel("Total Penyewaan Harian")
@@ -58,10 +56,10 @@ ax1.tick_params(axis='x', rotation=45)
 plt.tight_layout()
 st.pyplot(fig1)
 
-## Grafik 2: Trend Penyewaan per Hari dengan Label Setiap 2 Bulan
-st.write("### Tren Penyewaan Sepeda per Hari (Label setiap 2 bulan)")
+# Grafik 2: Trend Penyewaan per Hari dengan Label Setiap 2 Bulan
+st.write("Tren Penyewaan Sepeda per Hari (Label setiap 2 bulan)")
 fig2, ax2 = plt.subplots(figsize=(12,6))
-sns.lineplot(data=df, x='dateday', y='daily_cnt', ax=ax2)
+sns.lineplot(data=df_filtered, x=date_col, y='daily_cnt', ax=ax2)
 ax2.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
 ax2.xaxis.set_major_formatter(mdates.DateFormatter('%b-%Y'))
 ax2.set_title("Tren Penyewaan Sepeda per Hari")
@@ -71,12 +69,10 @@ ax2.tick_params(axis='x', rotation=45)
 plt.tight_layout()
 st.pyplot(fig2)
 
-## Grafik 3: Tren Penyewaan per Bulan (Rata-rata)
-st.write("### Tren Penyewaan Sepeda per Bulan (Rata-rata)")
-# Buat kolom 'month_year'
-df['month_year'] = df['dateday'].dt.to_period('M').astype(str)
-# Agregasi rata-rata daily_cnt per bulan
-df_monthly = df.groupby('month_year', as_index=False)['daily_cnt'].mean()
+# Grafik 3: Tren Penyewaan per Bulan (Rata-rata)
+st.write("Tren Penyewaan Sepeda per Bulan (Rata-rata)")
+df_filtered['month_year'] = df_filtered[date_col].dt.to_period('M').astype(str)
+df_monthly = df_filtered.groupby('month_year', as_index=False)['daily_cnt'].mean()
 fig3, ax3 = plt.subplots(figsize=(12,6))
 sns.lineplot(data=df_monthly, x='month_year', y='daily_cnt', ax=ax3)
 ax3.set_title("Tren Penyewaan Sepeda per Bulan")
@@ -85,6 +81,7 @@ ax3.set_ylabel("Rata-rata Penyewaan Harian")
 ax3.tick_params(axis='x', rotation=45)
 plt.tight_layout()
 st.pyplot(fig3)
+
 
 # -----------------------------
 # 2. Rata-rata Penyewaan per Musim (Bar Plot)
